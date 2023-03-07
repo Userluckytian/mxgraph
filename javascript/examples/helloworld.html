@@ -5,69 +5,123 @@
   a DOM node to create a graph and adding vertices and edges.
 -->
 <html>
+
 <head>
 	<title>Hello, World! example for mxGraph</title>
-
 	<!-- Sets the basepath for the library if not in same directory -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
+	<!-- mxBasePath： 这是一个JavaScript变量，用来定义CSS，图片， 资源和js的使用的目录。它是一段JavaScript代码，并需要被放置在 script 标签内。 它必须在加载mxClient.js之前，而且不应该斜线。 -->
 
 	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
+	<style type="text/css">
+		#graphContainer{
+			position:relative;
+			overflow:hidden;
+			width:100vw;
+			height:100vh;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+		}
+		.flow {
+			stroke: cornflowerblue;
+			stroke-dasharray: 8;
+			animation: dash 0.5s linear infinite;
+			/* animation-iteration-count: infinite; */
+		}
+
+		@keyframes dash {
+			to {
+				stroke-dashoffset: -16;
+			}
+		}
+	</style>
+
 	<!-- Example code -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
-		function main(container)
-		{
+		// Program starts here. Creates a sample graph in the  		//程序从这里开始。
+		// DOM node with the specified ID. This function is invoked  在具有指定ID的DOM节点。将调用此函数
+		// from the onLoad event handler of the document (see below).  来自文档的onLoad事件处理程序（见下文）。
+
+		function main(container) {
 			// Checks if the browser is supported
-			if (!mxClient.isBrowserSupported())
-			{
+			if (!mxClient.isBrowserSupported()) {
 				// Displays an error message if the browser is not supported.
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
-			else
-			{
+			else {
 				// Disables the built-in context menu
 				mxEvent.disableContextMenu(container);
-				
-				// Creates the graph inside the given container
+
+				// Creates the graph inside the given container // 在给定容器内创建图形
 				var graph = new mxGraph(container);
 
-				// Enables rubberband selection
+				// Enables rubberband selection // 启用橡皮筋选择
 				new mxRubberband(graph);
-				
+
 				// Gets the default parent for inserting new cells. This
 				// is normally the first child of the root (ie. layer 0).
+				//获取用于插入新单元格的默认父级。
+				//这通常是根的第一个子级（即层0）。
 				var parent = graph.getDefaultParent();
-								
+
 				// Adds cells to the model in a single step
 				graph.getModel().beginUpdate();
-				try
-				{
-					var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
-					var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
-					var e1 = graph.insertEdge(parent, null, '', v1, v2);
+				try {
+					/* 
+					  mxGraph.insertVertex(parent, id, value, x, y, width, height, style) –在调用开始/结束更新中，创建并插入一个新的节点到模型中。
+					  参数： parent：组结构中此图元的【直接父图元】亲爹，不找爷爷
+							id：描述此单元的全局唯一身份号码，总是一个字符串。
+							value：此单元的用户对象。用户对象只是一些对象，可以让您把应用程序的商务逻辑与mxGraph的可视化呈现相关联。在手册的后面有详细地描述，这里我们就只用字符 串就好，并把它们显示成节点和边的标签。
+							x： 
+							y： 
+							width： 
+							height： 
+							style：
+					*/
+
+					var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 20);
+					var v2 = graph.insertVertex(parent, null, 'World!', 180, 20, 80, 20);
+					/* 
+						mxGraph.insertEdge(parent, id, value, source, target, style)
+						在调用开始/结束更新中，创建并插入一条新的连线到模型中。
+						source和target参数定义了节点要连接的节点。注意，源节点 和目标节点需要已经被加入到模型中。
+					*/
+					var e1 = graph.insertEdge(parent, null, '', v1, v2, 'strokeWidth=3;endArrow=none;endSize=2;endFill=1;rounded=1;');
+					e1.geometry.points = [new mxPoint(60, 90), new mxPoint(220, 90)];
+					graph.orderCells(true, [e1]);
 				}
-				finally
-				{
+				finally {
 					// Updates the display
 					graph.getModel().endUpdate();
 				}
+				// Adds animation to edge shape and makes "pipe" visible
+				var state = graph.view.getState(e1);
+				console.log(state.shape.node);
+				state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
+				state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '6');
+				state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', 'lightGray');
+				state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
+				state.shape.node.getElementsByTagName('path')[2].setAttribute('opacity', '0');
 			}
 		};
+
+		window.onload = () => {
+			const dom = document.getElementById('graphContainer');
+			main(dom);
+		}
 	</script>
 </head>
 
 <!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
+
+<body>
 
 	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="position:relative;overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+	<div id="graphContainer"></div>
 </body>
+
 </html>
